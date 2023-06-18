@@ -850,6 +850,11 @@ TfLiteStatus MicroAllocator::CommitStaticMemoryPlan(
                  non_persistent_buffer_allocator_->GetOverlayMemoryAddress(),
                  allocation_info, allocation_info_count));
 
+#ifdef TF_LITE_SHOW_MEMORY_USE
+  memory_planner_->PrintMemoryPlan();
+#endif
+  head_usage = memory_planner_->GetMaximumMemorySize();
+
   // Reset all temp allocations used above:
   builder.FreeAllocationInfo();
   non_persistent_buffer_allocator_->DeallocateTemp(planner_arena);
@@ -858,11 +863,6 @@ TfLiteStatus MicroAllocator::CommitStaticMemoryPlan(
   TF_LITE_ENSURE_STATUS(
       non_persistent_buffer_allocator_->DeallocateResizableBuffer(
           scratch_buffer_head_));
-
-#ifdef TF_LITE_SHOW_MEMORY_USE
-  memory_planner_->PrintMemoryPlan();
-#endif
-  head_usage = memory_planner_->GetMaximumMemorySize();
 
   // The head is used to store memory plans for one model at a time during the
   // model preparation stage, and is re-purposed to store scratch buffer handles
